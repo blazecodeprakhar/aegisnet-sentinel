@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AegisNet Sentinel | Autonomous SOC & IPS Dashboard</title>
+    <!-- Modern Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation Header -->
+        <header class="navbar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>AEGISNET SENTINEL</h1>
+                    <span class="sub-text">AUTONOMOUS NIDS & FIREWALL IPS ENGINE</span>
+                </div>
+            </div>
+            
+            <div class="header-status">
+                <div class="status-badge platform-badge" id="platformBadge">
+                    <i class="fa-brands fa-linux"></i> <span id="platformText">DETECTING OS...</span>
+                </div>
+                <div class="status-badge ws-badge disconnected" id="wsStatus">
+                    <span class="pulse-dot"></span> <span id="wsText">DISCONNECTED</span>
+                </div>
+                <div class="system-time" id="clockDisplay">00:00:00</div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Content -->
+        <main class="dashboard-grid">
+            
+            <!-- Top Metric KPI Cards -->
+            <section class="kpi-row">
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span>TOTAL PACKETS CAPTURED</span>
+                        <i class="fa-solid fa-network-wired text-cyan"></i>
+                    </div>
+                    <div class="kpi-value" id="kpiPackets">0</div>
+                    <div class="kpi-subtext"><span id="kpiPps">0</span> pps processing speed</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span>THREAT ALERTS DETECTED</span>
+                        <i class="fa-solid fa-triangle-exclamation text-amber"></i>
+                    </div>
+                    <div class="kpi-value text-amber" id="kpiAlerts">0</div>
+                    <div class="kpi-subtext">Multi-vector heuristic alerts</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span>ACTIVE IPS FIREWALL BANS</span>
+                        <i class="fa-solid fa-ban text-crimson"></i>
+                    </div>
+                    <div class="kpi-value text-crimson" id="kpiBans">0</div>
+                    <div class="kpi-subtext">Dynamic iptables active rules</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span>SYSTEM UPTIME</span>
+                        <i class="fa-solid fa-server text-emerald"></i>
+                    </div>
+                    <div class="kpi-value text-emerald" id="kpiUptime">0s</div>
+                    <div class="kpi-subtext">Real-time daemon active</div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section class="charts-row">
+                <div class="glass-panel chart-panel">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-chart-line text-cyan"></i> Real-time Traffic Breakdown</h3>
+                        <span class="badge-mini">LIVE FEED</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="trafficChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="glass-panel chart-panel">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-chart-pie text-amber"></i> Threat Severity Distribution</h3>
+                        <span class="badge-mini">METRICS</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="severityChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lower Section: Alerts Feed & Firewall Control Panel -->
+            <section class="bottom-row">
+                
+                <!-- Live Threat Feed Table -->
+                <div class="glass-panel alerts-panel">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-bolt text-amber"></i> Real-time Threat Intelligence Feed</h3>
+                        <div class="filter-group">
+                            <button class="filter-btn active" data-filter="ALL">ALL</button>
+                            <button class="filter-btn text-crimson" data-filter="CRITICAL">CRITICAL</button>
+                            <button class="filter-btn text-amber" data-filter="HIGH">HIGH</button>
+                            <button class="filter-btn text-cyan" data-filter="MEDIUM">MEDIUM</button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>TIME</th>
+                                    <th>SEVERITY</th>
+                                    <th>ATTACK TYPE</th>
+                                    <th>SOURCE IP</th>
+                                    <th>DETAILS</th>
+                                    <th>IPS ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody id="alertsTableBody">
+                                <tr>
+                                    <td colspan="6" class="empty-state">
+                                        <i class="fa-solid fa-shield-cat"></i> System monitoring active. Waiting for traffic anomalies...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Firewall IPS Control Panel -->
+                <div class="glass-panel firewall-panel">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-fire-burner text-crimson"></i> Dynamic Firewall Manager</h3>
+                        <span class="badge-mini badge-danger">IPTABLES / IPS</span>
+                    </div>
+                    
+                    <!-- Manual Ban Input -->
+                    <form class="manual-block-form" id="manualBlockForm">
+                        <div class="input-group">
+                            <input type="text" id="blockIpInput" placeholder="Enter IP address (e.g. 192.168.1.50)" required>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fa-solid fa-ban"></i> BLOCK IP
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Active Bans List -->
+                    <div class="bans-header">
+                        <span>ACTIVE FIREWALL RULES</span>
+                        <span id="activeBansCountBadge" class="badge-pill">0 ACTIVE</span>
+                    </div>
+
+                    <div class="bans-list-container" id="bansListContainer">
+                        <div class="empty-bans">No active IP bans currently enforced.</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
